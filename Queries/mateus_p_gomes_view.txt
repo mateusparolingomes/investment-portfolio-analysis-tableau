@@ -1,0 +1,45 @@
+mateus_p_gomes_view:
+
+CREATE VIEW mateus_p_gomes_view AS 
+
+SELECT 
+holdings_current.ticker,
+holdings_current.date AS 'holdings_date',
+holdings_current.variable AS 'holdings_variable',
+holdings_current.value AS 'holdings_value',
+holdings_current.price_type AS 'holdings_price_type',
+holdings_current.quantity AS 'holdings_quantity',
+(holdings_current.value * holdings_current.quantity) AS 'AUM',
+security_masterlist.security_name,
+security_masterlist.sp500_weight,
+security_masterlist.sec_type,
+security_masterlist.major_asset_class,
+security_masterlist.minor_asset_class,
+pricing_daily_new.date AS 'pricing_daily_date',
+pricing_daily_new.variable AS 'pricing_daily_variable',
+pricing_daily_new.value AS 'pricing_daily_value',
+pricing_daily_new.price_type AS 'pricing_daily_price_type',
+account_dim.account_id,
+account_dim.acct_open_date,
+account_dim.acct_open_status,
+customer_details.customer_id,
+customer_details.full_name,
+customer_details.email,
+customer_details.customer_location,
+LAG(pricing_daily_new.value, 1) OVER (PARTITION BY pricing_daily_new.ticker ORDER BY pricing_daily_new.date) AS 'previous_value'
+
+FROM invest.pricing_daily_new
+       
+INNER JOIN invest.security_masterlist USING (ticker)
+
+INNER JOIN invest.holdings_current USING (ticker)
+
+INNER JOIN invest.account_dim USING (account_id)
+
+INNER JOIN invest.customer_details ON
+account_dim.client_id = customer_details.customer_id
+
+WHERE 
+        pricing_daily_new.price_type = 'Adjusted' 
+        AND pricing_daily_new.date > '2020-08-09'
+        AND customer_details.customer_id = '148'

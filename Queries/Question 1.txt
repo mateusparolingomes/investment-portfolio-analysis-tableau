@@ -1,0 +1,20 @@
+Question 1:
+
+SELECT 
+    ticker,
+    (pricing_daily_value - previous_value12) / previous_value12 AS ror_12_months,
+    (pricing_daily_value - previous_value18) / previous_value18 AS ror_18_months,
+    (pricing_daily_value - previous_value24) / previous_value12 AS ror_24_months
+FROM (
+SELECT
+ticker,
+pricing_daily_value,
+pricing_daily_date,
+LAG(pricing_daily_value, 250) OVER (PARTITION BY ticker ORDER BY pricing_daily_date) AS 'previous_value12',
+LAG(pricing_daily_value, 375) OVER (PARTITION BY ticker ORDER BY pricing_daily_date) AS 'previous_value18',
+LAG(pricing_daily_value, 500) OVER (PARTITION BY ticker ORDER BY pricing_daily_date) AS 'previous_value24'
+FROM mateus_p_gomes_view
+) AS sb
+WHERE pricing_daily_date = '2022-09-09'
+GROUP BY ticker
+ORDER BY ror_12_months DESC;

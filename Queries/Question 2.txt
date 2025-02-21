@@ -1,0 +1,11 @@
+Question 2:
+
+SELECT 
+    ticker, 
+    AVG((pricing_daily_value - previous_value) / previous_value) AS 'avg_return',
+    STD((pricing_daily_value - previous_value) / previous_value) AS 'sigma' 
+FROM invest.mateus_p_gomes_view
+WHERE previous_value IS NOT NULL
+AND pricing_daily_date >= DATE_SUB('2022-09-09', INTERVAL 12 MONTH)
+GROUP BY ticker
+ORDER BY sigma DESC;
